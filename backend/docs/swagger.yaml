@@ -1,0 +1,28 @@
+info:
+  contact: {}
+paths:
+  /api/health:
+    get:
+      responses: {}
+      tags:
+      - App
+  /api/login:
+    post:
+      parameters:
+      - description: login data
+        in: body
+        name: credential
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      responses: {}
+      tags:
+      - App
+securityDefinitions:
+  Authorization:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

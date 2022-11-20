@@ -1,0 +1,45 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/api/health": {
+            "get": {
+                "tags": [
+                    "App"
+                ],
+                "responses": {}
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "App"
+                ],
+                "parameters": [
+                    {
+                        "description": "login data",
+                        "name": "credential",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    },
+    "securityDefinitions": {
+        "Authorization": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}
