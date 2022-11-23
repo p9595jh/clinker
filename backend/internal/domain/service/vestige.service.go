@@ -9,12 +9,14 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/p9595jh/fpgo"
+	"github.com/p9595jh/transform"
 )
 
 type VestigeService struct {
 	vestigeRepository   repository.VestigeRepository
 	apprasialRepository repository.AppraisalRepository
 	userRepository      repository.UserRepository
+	processService      *ProcessService
 }
 
 func NewVestigeService(
@@ -27,6 +29,17 @@ func NewVestigeService(
 		apprasialRepository: apprasialRepository,
 		userRepository:      userRepository,
 	}
+}
+
+func (s *VestigeService) Initializer() {
+	s.processService.transformer.RegisterTransformer("vestigesE2R", transform.F2(func(v []entity.Vestige, s string) []res.VestigeRes {
+		return fpgo.Pipe[[]entity.Vestige, []res.VestigeRes](
+			v,
+			fpgo.Map(func(i int, v *entity.Vestige) *res.VestigeRes {
+				return new(res.VestigeRes).FromEntity(v)
+			}),
+		)
+	}))
 }
 
 // will be shown in the main page

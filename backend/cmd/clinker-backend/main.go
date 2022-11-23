@@ -62,9 +62,9 @@ func main() {
 
 	// service
 	var (
-		vestigeService    = service.NewVestigeService(vestigeRepository, appraisalRepository, userRepository)
-		authService       = service.NewAuthService(userRepository)
-		preprocessService = service.NewPreprocessService(validator.New(), transform.New())
+		vestigeService = service.NewVestigeService(vestigeRepository, appraisalRepository, userRepository)
+		authService    = service.NewAuthService(userRepository)
+		processService = service.NewProcessService(validator.New(), transform.New())
 	)
 
 	logger.Info(ctx).W("Services loaded")
@@ -104,7 +104,7 @@ func main() {
 	// controller
 	var (
 		appController  = controller.NewAppController(api)
-		authController = controller.NewAuthController(api.Group("/auth"), authService, preprocessService)
+		authController = controller.NewAuthController(api.Group("/auth"), authService, processService)
 	)
 
 	controllers := []hook.Controller{

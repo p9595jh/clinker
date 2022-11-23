@@ -12,9 +12,9 @@ type Vestige struct {
 	Hit                     int64  `gorm:"type:int;default:0;not null"`
 	Confirmed               bool   `gorm:"type:bool;default:false;not null"`
 
-	UserId     string
-	User       User
-	Appraisals []Appraisal
+	UserId     string      `transform:"map:-"`
+	User       User        `transform:"userE2R"`
+	Appraisals []Appraisal `transform:"appraisalE2R"`
 
 	Children []Vestige `gorm:"-"`
 }

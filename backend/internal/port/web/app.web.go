@@ -56,7 +56,9 @@ func (w *Web) Attach(controllers []hook.Controller) {
 			user := c.Locals("user").(*jwt.Token)
 			claims := user.Claims.(jwt.MapClaims)
 			id := claims["id"].(string)
+			authority := claims["authority"].(uint8)
 			c.Locals("id", id)
+			c.Locals("authority", authority)
 			return c.Next()
 		},
 		ErrorHandler: func(c *fiber.Ctx, err error) error {

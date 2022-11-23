@@ -32,7 +32,6 @@ require (
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mattn/go-runewidth v0.0.14 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
-	github.com/p9595jh/transform v0.0.0-20221117085711-b8b66aa541de // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/rivo/uniseg v0.4.2 // indirect
@@ -62,6 +61,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/p9595jh/fpgo v1.0.0
+	github.com/p9595jh/transform v0.0.0-20221121065905-e56f2aa3ce9a
 	github.com/spf13/viper v1.14.0
 	golang.org/x/crypto v0.2.0
 	golang.org/x/sys v0.2.0 // indirect

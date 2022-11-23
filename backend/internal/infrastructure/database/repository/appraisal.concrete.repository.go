@@ -25,3 +25,9 @@ func (r *appraisalRepository) FindByVestigeHead(head string) (*[]entity.Appraisa
 	))
 	return reposh.FilteredRecord(appraisals, err)
 }
+
+func (r *appraisalRepository) CountByUserId(userId string) (int64, error) {
+	var count int64
+	err := r.Model().Count(&count).Where("user_id = ?", userId).Error
+	return count, err
+}

@@ -43,23 +43,24 @@ func (s *AuthService) compare(input, password string) bool {
 	}
 }
 
-func (s *AuthService) PublishToken(id string) (string, error) {
+func (s *AuthService) PublishToken(user *entity.User) (string, error) {
 	claims := jwt.MapClaims{
-		"id":  id,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"id":        user.Id,
+		"authority": user.Authority,
+		"exp":       time.Now().Add(time.Hour * 24).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	return token.SignedString(s.privateKey)
 }
 
-func (s *AuthService) Validate(id, password string) (bool, error) {
-	admin, err := s.userRepository.FindById(id)
+func (s *AuthService) Validate(id, password string) (bool, *entity.User, error) {
+	user, err := s.userRepository.FindById(id)
 	if err != nil {
-		return false, err
-	} else if admin == nil {
-		return false, nil
+		return false, nil, err
+	} else if user == nil {
+		return false, nil, nil
 	} else {
-		return s.compare(password, admin.Password), nil
+		return s.compare(password, user.Password), user, nil
 	}
 }
 

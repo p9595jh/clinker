@@ -10,20 +10,20 @@ import (
 )
 
 type VestigeController struct {
-	router            fiber.Router
-	vestigeService    *service.VestigeService
-	preprocessService *service.PreprocessService
+	router         fiber.Router
+	vestigeService *service.VestigeService
+	processService *service.ProcessService
 }
 
 func NewVestigeController(
 	router fiber.Router,
 	vestigeService *service.VestigeService,
-	preprocessService *service.PreprocessService,
+	processService *service.ProcessService,
 ) *VestigeController {
 	return &VestigeController{
-		router:            router,
-		vestigeService:    vestigeService,
-		preprocessService: preprocessService,
+		router:         router,
+		vestigeService: vestigeService,
+		processService: processService,
 	}
 }
 
@@ -48,7 +48,7 @@ func (*VestigeController) name() string {
 // @param   pagination query dto.VestigePaginationDto true "pagination data"
 func (c *VestigeController) findOrphans(ctx *fiber.Ctx) error {
 	pagination := new(dto.VestigePanginationDto)
-	if err := c.preprocessService.PipeParsing(ctx.QueryParser, pagination, nil); err != nil {
+	if err := c.processService.PreWithParser(ctx.QueryParser, pagination, nil); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(res.NewErrorClientRes(ctx, err.Error()))
 	}
 
@@ -64,7 +64,7 @@ func (c *VestigeController) findOrphans(ctx *fiber.Ctx) error {
 // @param   txHash path string true "txHash"
 func (c *VestigeController) findOne(ctx *fiber.Ctx) error {
 	param := new(dto.VestigeTxHashDto)
-	if err := c.preprocessService.Pipe(ctx.AllParams(), param, nil); err != nil {
+	if err := c.processService.Pre(ctx.AllParams(), param, nil); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(res.NewErrorClientRes(ctx, err.Error()))
 	}
 
@@ -79,12 +79,12 @@ func (c *VestigeController) findOne(ctx *fiber.Ctx) error {
 // @router  /api/vestiges/friends/{txHash} [get]
 // @param   txHash path string true "txHash"
 func (c *VestigeController) findFriends(ctx *fiber.Ctx) error {
-	body := new(dto.VestigeTxHashDto)
-	if err := c.preprocessService.PipeParsing(ctx.BodyParser, body, nil); err != nil {
+	param := new(dto.VestigeTxHashDto)
+	if err := c.processService.Pre(ctx.AllParams(), param, nil); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(res.NewErrorClientRes(ctx, err.Error()))
 	}
 
-	vestiges, errRes := c.vestigeService.FindFriendsByHead(body.TxHash)
+	vestiges, errRes := c.vestigeService.FindFriendsByHead(param.TxHash)
 	return res.New(errRes).JustReturn(ctx, logger.Error(c.name()), vestiges)
 }
 
@@ -97,15 +97,15 @@ func (c *VestigeController) findFriends(ctx *fiber.Ctx) error {
 // @param   txHash     path  string                   true "txHash"
 func (c *VestigeController) findChildren(ctx *fiber.Ctx) error {
 	pagination := new(dto.VestigePanginationDto)
-	if err := c.preprocessService.PipeParsing(ctx.QueryParser, pagination, nil); err != nil {
+	if err := c.processService.PreWithParser(ctx.QueryParser, pagination, nil); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(res.NewErrorClientRes(ctx, err.Error()))
 	}
 
-	body := new(dto.VestigeTxHashDto)
-	if err := c.preprocessService.PipeParsing(ctx.BodyParser, body, nil); err != nil {
+	param := new(dto.VestigeTxHashDto)
+	if err := c.processService.Pre(ctx.AllParams(), param, nil); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(res.NewErrorClientRes(ctx, err.Error()))
 	}
 
-	vestiges, errRes := c.vestigeService.FindChildren(body.TxHash, pagination.Skip, pagination.Take)
+	vestiges, errRes := c.vestigeService.FindChildren(param.TxHash, pagination.Skip, pagination.Take)
 	return res.New(errRes).JustReturn(ctx, logger.Error(c.name()), vestiges)
 }

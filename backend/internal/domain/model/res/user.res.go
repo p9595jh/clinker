@@ -12,6 +12,7 @@ type UserRes struct {
 	Id         string                 `json:"id"`
 	Nickname   string                 `json:"nickname"`
 	Address    string                 `json:"address"`
+	StopUntil  string                 `json:"stopUntil"`
 	Vestiges   []VestigeRes           `json:"vestiges"`
 	Appraisals []AppraisalSpecificRes `json:"appraisals"`
 }
@@ -37,4 +38,13 @@ func (r *UserRes) FromEntity(e *entity.User) *UserRes {
 		}),
 	)
 	return r
+}
+
+type UsersRes struct {
+	TotalCount int64     `json:"totalCount"`
+	Data       []UserRes `json:"data"`
+}
+
+type UserStopRes struct {
+	Id string `json:"id"`
 }

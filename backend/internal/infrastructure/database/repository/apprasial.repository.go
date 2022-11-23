@@ -8,4 +8,5 @@ import (
 type AppraisalRepository interface {
 	reposh.BaseRepository[entity.Appraisal]
 	FindByVestigeHead(head string) (*[]entity.Appraisal, error)
+	CountByUserId(userId string) (int64, error)
 }

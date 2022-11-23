@@ -3,7 +3,7 @@ package res
 import "clinker-backend/internal/infrastructure/database/entity"
 
 type AppraisalRes struct {
-	Count     int     `json:"Count"`
+	Count     int     `json:"count"`
 	Appraisal float64 `json:"appraisal"`
 }
 
@@ -43,4 +43,9 @@ func (r *AppraisalSpecificRes) FromEntity(e *entity.Appraisal) *AppraisalSpecifi
 	r.Next = new(VestigeRes).FromEntity(&e.Next)
 	r.User = new(UserRes).FromEntity(&e.User)
 	return r
+}
+
+type AppraisalSpecificsRes struct {
+	TotalCount int64                  `json:"totalCount"`
+	Data       []AppraisalSpecificRes `json:"data"`
 }
