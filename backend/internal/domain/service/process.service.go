@@ -3,6 +3,7 @@ package service
 import (
 	"clinker-backend/common/util"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -30,6 +31,7 @@ func (s *ProcessService) Initializer() {
 		"txHash":  regexp.MustCompile("^(0x)?[a-fA-F0-9]{64,64}$"),
 	}
 	for tag, regex := range regexps {
+		regex := regex
 		s.validator.RegisterValidation(tag, func(fl validator.FieldLevel) bool {
 			return regex.MatchString(fl.Field().String())
 		})
@@ -46,9 +48,13 @@ func (s *ProcessService) Initializer() {
 	s.transformer.RegisterTransformer("add0x", transform.F1(func(s1, s2 string) string {
 		return "0x" + s1
 	}))
+	s.transformer.RegisterTransformer("subtract", transform.F1(func(i int, s string) int {
+		sub, _ := strconv.ParseInt(s, 10, 32)
+		return i - int(sub)
+	}))
 }
 
-// target must be pointer
+// target must be a pointer
 func (s *ProcessService) Decode(params map[string]string, target any) error {
 	return mapstructure.Decode(params, &target)
 }

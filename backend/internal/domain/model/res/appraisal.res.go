@@ -44,8 +44,3 @@ func (r *AppraisalSpecificRes) FromEntity(e *entity.Appraisal) *AppraisalSpecifi
 	r.User = new(UserRes).FromEntity(&e.User)
 	return r
 }
-
-type AppraisalSpecificsRes struct {
-	TotalCount int64                  `json:"totalCount"`
-	Data       []AppraisalSpecificRes `json:"data"`
-}

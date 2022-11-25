@@ -8,7 +8,7 @@ import (
 type writer struct {
 	keys       []string
 	processors map[string]func([]byte) any
-	id         any
+	id         string
 }
 
 func (w *writer) Write(p []byte) (n int, err error) {
@@ -28,7 +28,7 @@ func (w *writer) Write(p []byte) (n int, err error) {
 		}
 		logItem = logItem.D(k, v)
 	}
-	if _, ok := w.id.(string); ok {
+	if w.id != "" {
 		logItem = logItem.D("user_id", w.id)
 	}
 	logItem.W()

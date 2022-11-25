@@ -20,7 +20,7 @@ func NewVestigeRepository(db *gorm.DB) VestigeRepository {
 }
 
 // return: Vestige[txHash].Children, Vestige[txHash].Children[:].Appraisals
-func (r *vestigeRepository) FindAliveChildrenByTxHash(txHash string, skip, take int) (*[]entity.Vestige, int64, error) {
+func (r *vestigeRepository) FindAliveChildrenByTxHash(txHash string, page, take int) (*[]entity.Vestige, int64, error) {
 	// find count of all children
 	var (
 		countWait sync.WaitGroup
@@ -45,7 +45,7 @@ func (r *vestigeRepository) FindAliveChildrenByTxHash(txHash string, skip, take 
 		},
 		Order:  reposh.OrderBy{Column: "created_at", Desc: true},
 		Limit:  take,
-		Offset: take * skip,
+		Offset: take * page,
 	})
 
 	// filtering
@@ -89,7 +89,7 @@ func (r *vestigeRepository) FindAliveChildrenByTxHash(txHash string, skip, take 
 	return vestiges, count, nil
 }
 
-func (r *vestigeRepository) CountOrphans() (int64, error) {
+func (r *vestigeRepository) CountAncestors() (int64, error) {
 	var count int64
 	err := r.Model().Count(&count).Where("parent = ?", util.DefaultTxHash).Error
 	return count, err

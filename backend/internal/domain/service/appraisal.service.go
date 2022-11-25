@@ -1,26 +1,32 @@
 package service
 
 import (
+	"clinker-backend/common/util"
+	"clinker-backend/internal/domain/model/dto"
 	"clinker-backend/internal/domain/model/res"
 	"clinker-backend/internal/infrastructure/database/entity"
 	"clinker-backend/internal/infrastructure/database/repository"
 	"clinker-backend/internal/infrastructure/database/repository/reposh"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/p9595jh/fpgo"
 	"github.com/p9595jh/transform"
 )
 
 type AppraisalService struct {
 	appraisalRepository repository.AppraisalRepository
+	vestigeRepository   repository.VestigeRepository
 	processService      *ProcessService
 }
 
 func NewAppraisalService(
 	appraisalRepository repository.AppraisalRepository,
+	vestigeRepository repository.VestigeRepository,
 	processService *ProcessService,
 ) *AppraisalService {
 	return &AppraisalService{
 		appraisalRepository: appraisalRepository,
+		vestigeRepository:   vestigeRepository,
 		processService:      processService,
 	}
 }
@@ -53,11 +59,11 @@ func (s *AppraisalService) FindByVestigeHead(head string) (*res.AppraisalRes, *r
 	}
 }
 
-func (s *AppraisalService) FindByUserId(skip, take int, userId string) (*res.AppraisalSpecificsRes, *res.ErrorRes) {
+func (s *AppraisalService) FindByUserId(page, take int, userId string) (*res.ProfuseRes[res.AppraisalSpecificRes], *res.ErrorRes) {
 	appraisals, err := s.appraisalRepository.Find(&reposh.FindOption[entity.Appraisal]{
 		Order:  reposh.OrderBy{Column: "created_at", Desc: true},
 		Limit:  take,
-		Offset: take * skip,
+		Offset: take * page,
 		Where: reposh.EntityParts[entity.Appraisal]{
 			Entity: &entity.Appraisal{UserId: userId},
 		},
@@ -66,13 +72,13 @@ func (s *AppraisalService) FindByUserId(skip, take int, userId string) (*res.App
 	if err != nil {
 		return nil, res.NewInternalErrorRes(err)
 	} else if appraisals == nil {
-		return &res.AppraisalSpecificsRes{TotalCount: 0, Data: make([]res.AppraisalSpecificRes, 0)}, nil
+		return &res.ProfuseRes[res.AppraisalSpecificRes]{TotalCount: 0, Data: make([]res.AppraisalSpecificRes, 0)}, nil
 	} else {
 		count, err := s.appraisalRepository.CountByUserId(userId)
 		if err != nil {
 			return nil, res.NewInternalErrorRes(err)
 		}
-		return &res.AppraisalSpecificsRes{
+		return &res.ProfuseRes[res.AppraisalSpecificRes]{
 			TotalCount: count,
 			Data: fpgo.Pipe[[]entity.Appraisal, []res.AppraisalSpecificRes](
 				*appraisals,
@@ -97,5 +103,48 @@ func (s *AppraisalService) FindValidAppraisal(head string) (*res.AppraisalRes, *
 		return &res.AppraisalRes{}, nil
 	} else {
 		return appraisalRes, nil
+	}
+}
+
+func (s *AppraisalService) Save(userId string, appraisal *dto.AppraisalDto) (*res.SaveTxHashRes, *res.ErrorRes) {
+	appraisalEntity := &entity.Appraisal{
+		Value:  appraisal.Value,
+		NextId: appraisal.NextId,
+		UserId: userId,
+	}
+
+	vestige, err := s.vestigeRepository.FindOne(&reposh.FindOption[entity.Vestige]{
+		Select: []string{"tx_hash", "head"},
+		Where: reposh.EntityParts[entity.Vestige]{EntityFn: func(e *entity.Vestige) {
+			e.TxHash = appraisal.NextId
+		}},
+	})
+	if err != nil {
+		return nil, res.NewInternalErrorRes(err)
+	} else {
+		appraisalEntity.VestigeId = vestige.Head
+	}
+
+	prev, err := s.appraisalRepository.FindOne(&reposh.FindOption[entity.Appraisal]{
+		Select: []string{"vestige_id", "user_id", "tx_hash"},
+		Where: reposh.EntityParts[entity.Appraisal]{Entity: &entity.Appraisal{
+			VestigeId: vestige.Head,
+			UserId:    userId,
+		}},
+	})
+	if err != nil {
+		return nil, res.NewInternalErrorRes(err)
+	} else if prev != nil {
+		return nil, res.NewErrorfRes(fiber.StatusConflict, "already did")
+	}
+
+	// temp
+	appraisalEntity.TxHash = util.RandHex(64)
+	appraisalEntity.Confirmed = true
+
+	if newAppraisal, err := s.appraisalRepository.Save(appraisalEntity); err != nil {
+		return nil, res.NewInternalErrorRes(err)
+	} else {
+		return &res.SaveTxHashRes{TxHash: newAppraisal.TxHash}, nil
 	}
 }

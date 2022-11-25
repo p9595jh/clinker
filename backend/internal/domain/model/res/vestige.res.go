@@ -32,8 +32,3 @@ func (r *VestigeRes) FromEntity(e *entity.Vestige) *VestigeRes {
 	r.Appraisal = new(AppraisalRes).FromEntity(e.Appraisals)
 	return r
 }
-
-type VestigesRes struct {
-	TotalCount int64        `json:"totalCount"`
-	Data       []VestigeRes `json:"data"`
-}

@@ -7,6 +7,6 @@ import (
 
 type VestigeRepository interface {
 	reposh.BaseRepository[entity.Vestige]
-	FindAliveChildrenByTxHash(txHash string, skip, take int) (*[]entity.Vestige, int64, error)
-	CountOrphans() (int64, error)
+	FindAliveChildrenByTxHash(txHash string, page, take int) (*[]entity.Vestige, int64, error)
+	CountAncestors() (int64, error)
 }

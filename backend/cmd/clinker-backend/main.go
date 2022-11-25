@@ -12,13 +12,11 @@ import (
 	"clinker-backend/internal/port/controller"
 	"clinker-backend/internal/port/web"
 	"fmt"
-	"os"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jasonlvhit/gocron"
 	"github.com/p9595jh/transform"
-	"github.com/rs/zerolog"
 )
 
 // @securityDefinitions.apikey Authorization
@@ -26,11 +24,6 @@ import (
 // @name                       Authorization
 func main() {
 	ctx := "Application"
-
-	// logger
-	logging := zerolog.New(os.Stdout).With().Timestamp().Logger()
-	logger.Inject(&logging)
-	logger.Info(ctx).W("Logger setting done")
 
 	// show configuration
 	logger.Info(ctx).D("config", config.ToMap()).W()
@@ -62,17 +55,22 @@ func main() {
 
 	// service
 	var (
-		vestigeService = service.NewVestigeService(vestigeRepository, appraisalRepository, userRepository)
-		authService    = service.NewAuthService(userRepository)
-		processService = service.NewProcessService(validator.New(), transform.New())
+		processService   = service.NewProcessService(validator.New(), transform.New())
+		authService      = service.NewAuthService(userRepository)
+		vestigeService   = service.NewVestigeService(vestigeRepository, appraisalRepository, userRepository, processService)
+		appraisalService = service.NewAppraisalService(appraisalRepository, vestigeRepository, processService)
+		userService      = service.NewUserService(userRepository, processService, authService)
 	)
 
 	logger.Info(ctx).W("Services loaded")
 
 	// hook
 	services := []any{
-		vestigeService,
+		processService,
 		authService,
+		vestigeService,
+		appraisalService,
+		userService,
 	}
 	scheduleItems := []hook.ScheduleItem{}
 	for _, s := range services {
@@ -103,13 +101,19 @@ func main() {
 
 	// controller
 	var (
-		appController  = controller.NewAppController(api)
-		authController = controller.NewAuthController(api.Group("/auth"), authService, processService)
+		appController       = controller.NewAppController(api)
+		authController      = controller.NewAuthController(api.Group("/auth"), authService, processService)
+		vestigeController   = controller.NewVestigeController(api.Group("/vestiges"), vestigeService, processService, authService)
+		appraisalController = controller.NewAppraisalController(api.Group("/appraisals"), appraisalService, processService, authService)
+		userController      = controller.NewUserController(api.Group("/users"), userService, processService)
 	)
 
 	controllers := []hook.Controller{
 		appController,
 		authController,
+		vestigeController,
+		appraisalController,
+		userController,
 	}
 	w.Attach(controllers)
 

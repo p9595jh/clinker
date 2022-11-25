@@ -1,25 +1,478 @@
+definitions:
+  dto.AppraisalDto:
+    properties:
+      value:
+        example: 30
+        maximum: 50
+        minimum: -50
+        type: integer
+      vestige:
+        type: string
+    required:
+    - value
+    - vestige
+    type: object
+  dto.UserDto:
+    properties:
+      address:
+        example: 0x1234567890abcdef1234567890abcdef12345678
+        type: string
+      id:
+        example: user123
+        maxLength: 30
+        type: string
+      nickname:
+        example: nick
+        maxLength: 20
+        type: string
+      password:
+        example: "123123123"
+        type: string
+    required:
+    - address
+    - id
+    - nickname
+    - password
+    type: object
+  dto.UserStopDtom:
+    properties:
+      date:
+        example: "2100-01-01"
+        type: string
+      reason:
+        example: no specific reason
+        type: string
+    required:
+    - date
+    - reason
+    type: object
+  dto.VestigeDto:
+    properties:
+      content:
+        type: string
+      head:
+        type: string
+      parent:
+        type: string
+      title:
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  res.AppraisalRes:
+    properties:
+      appraisal:
+        type: number
+      count:
+        type: integer
+    type: object
+  res.AppraisalSpecificRes:
+    properties:
+      confirmed:
+        type: boolean
+      createdAt:
+        type: string
+      next:
+        $ref: '#/definitions/res.VestigeRes'
+      txHash:
+        type: string
+      user:
+        $ref: '#/definitions/res.UserRes'
+      value:
+        type: integer
+      vestige:
+        $ref: '#/definitions/res.VestigeRes'
+    type: object
+  res.ProfuseRes-res_AppraisalSpecificRes:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/res.AppraisalSpecificRes'
+        type: array
+      totalCount:
+        type: integer
+    type: object
+  res.ProfuseRes-res_UserRes:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/res.UserRes'
+        type: array
+      totalCount:
+        type: integer
+    type: object
+  res.ProfuseRes-res_VestigeRes:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/res.VestigeRes'
+        type: array
+      totalCount:
+        type: integer
+    type: object
+  res.SaveTxHashRes:
+    properties:
+      txHash:
+        example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        type: string
+    type: object
+  res.UserIdRes:
+    properties:
+      id:
+        type: string
+    type: object
+  res.UserRes:
+    properties:
+      address:
+        type: string
+      appraisals:
+        items:
+          $ref: '#/definitions/res.AppraisalSpecificRes'
+        type: array
+      createdAt:
+        type: string
+      id:
+        type: string
+      nickname:
+        type: string
+      stopUntil:
+        type: string
+      vestiges:
+        items:
+          $ref: '#/definitions/res.VestigeRes'
+        type: array
+    type: object
+  res.VestigeRes:
+    properties:
+      appraisal:
+        $ref: '#/definitions/res.AppraisalRes'
+      children:
+        items:
+          $ref: '#/definitions/res.VestigeRes'
+        type: array
+      confirmed:
+        type: boolean
+      content:
+        type: string
+      createdAt:
+        type: string
+      friends:
+        items:
+          type: string
+        type: array
+      head:
+        type: string
+      hit:
+        type: integer
+      parent:
+        type: string
+      title:
+        type: string
+      txHash:
+        type: string
+      user:
+        $ref: '#/definitions/res.UserRes'
+    type: object
 info:
   contact: {}
 paths:
+  /api/appraisals:
+    post:
+      parameters:
+      - description: appraisal
+        in: body
+        name: appraisal
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AppraisalDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.SaveTxHashRes'
+      security:
+      - Authorization: []
+      summary: Save new appraisal
+      tags:
+      - Appraisal
+  /api/appraisals/{txHash}:
+    get:
+      parameters:
+      - description: txHash
+        in: path
+        name: txHash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.AppraisalRes'
+      summary: Find calculated appraisal with head's txHash
+      tags:
+      - Appraisal
+  /api/appraisals/users/{userId}:
+    get:
+      parameters:
+      - example: 0
+        in: query
+        minimum: 0
+        name: page
+        required: true
+        type: integer
+      - example: 10
+        in: query
+        name: take
+        required: true
+        type: integer
+      - description: user id
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.ProfuseRes-res_AppraisalSpecificRes'
+      security:
+      - Authorization: []
+      summary: Find by given user id
+      tags:
+      - Appraisal
   /api/health:
     get:
       responses: {}
       tags:
       - App
-  /api/login:
+  /api/users:
+    get:
+      parameters:
+      - example: 0
+        in: query
+        minimum: 0
+        name: page
+        required: true
+        type: integer
+      - example: 10
+        in: query
+        name: take
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.ProfuseRes-res_UserRes'
+      security:
+      - Authorization: []
+      summary: Inquire users
+      tags:
+      - User
     post:
       parameters:
-      - description: login data
+      - description: user
         in: body
-        name: credential
+        name: user
         required: true
         schema:
-          additionalProperties:
-            type: string
-          type: object
-      responses: {}
+          $ref: '#/definitions/dto.UserDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.UserIdRes'
+      summary: Save new User
       tags:
-      - App
+      - User
+  /api/users/{address}:
+    get:
+      parameters:
+      - description: address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.UserRes'
+      security:
+      - Authorization: []
+      summary: Find one user with address
+      tags:
+      - User
+  /api/users/{userId}:
+    get:
+      parameters:
+      - description: userId
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.UserRes'
+      security:
+      - Authorization: []
+      summary: Find one user with userId
+      tags:
+      - User
+    put:
+      parameters:
+      - description: userId
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: stop data
+        in: body
+        name: stop
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserStopDtom'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.UserIdRes'
+      security:
+      - Authorization: []
+      summary: Find one user with userId
+      tags:
+      - User
+  /api/vestiges:
+    post:
+      parameters:
+      - description: vestige
+        in: body
+        name: vestige
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VestigeDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.SaveTxHashRes'
+      security:
+      - Authorization: []
+      summary: Save new vestige
+      tags:
+      - Vestige
+  /api/vestiges/{txHash}:
+    get:
+      parameters:
+      - description: txHash
+        in: path
+        name: txHash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.VestigeRes'
+      summary: Find one vestige with txHash
+      tags:
+      - Vestige
+  /api/vestiges/ancestors:
+    get:
+      parameters:
+      - example: 0
+        in: query
+        minimum: 0
+        name: page
+        required: true
+        type: integer
+      - example: 10
+        in: query
+        name: take
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.ProfuseRes-res_VestigeRes'
+      summary: Inquire vestiges of the main page
+      tags:
+      - Vestige
+  /api/vestiges/children/{txHash}:
+    get:
+      parameters:
+      - example: 0
+        in: query
+        minimum: 0
+        name: page
+        required: true
+        type: integer
+      - example: 10
+        in: query
+        name: take
+        required: true
+        type: integer
+      - description: txHash
+        in: path
+        name: txHash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/res.ProfuseRes-res_VestigeRes'
+      summary: Find all children with head txHash
+      tags:
+      - Vestige
+  /api/vestiges/friends/{txHash}:
+    get:
+      parameters:
+      - description: txHash
+        in: path
+        name: txHash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/res.VestigeRes'
+            type: array
+      summary: Find all friends with head txHash
+      tags:
+      - Vestige
 securityDefinitions:
   Authorization:
     in: header

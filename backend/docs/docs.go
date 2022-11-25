@@ -16,6 +16,117 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/appraisals": {
+            "post": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Appraisal"
+                ],
+                "summary": "Save new appraisal",
+                "parameters": [
+                    {
+                        "description": "appraisal",
+                        "name": "appraisal",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AppraisalDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.SaveTxHashRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/appraisals/users/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Appraisal"
+                ],
+                "summary": "Find by given user id",
+                "parameters": [
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "example": 0,
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "name": "take",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.ProfuseRes-res_AppraisalSpecificRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/appraisals/{txHash}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Appraisal"
+                ],
+                "summary": "Find calculated appraisal with head's txHash",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "txHash",
+                        "name": "txHash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.AppraisalRes"
+                        }
+                    }
+                }
+            }
+        },
         "/api/health": {
             "get": {
                 "tags": [
@@ -24,26 +135,614 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/api/login": {
-            "post": {
-                "tags": [
-                    "App"
+        "/api/users": {
+            "get": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
                 ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Inquire users",
                 "parameters": [
                     {
-                        "description": "login data",
-                        "name": "credential",
+                        "minimum": 0,
+                        "type": "integer",
+                        "example": 0,
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "name": "take",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.ProfuseRes-res_UserRes"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Save new User",
+                "parameters": [
+                    {
+                        "description": "user",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.UserDto"
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.UserIdRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/{address}": {
+            "get": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Find one user with address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.UserRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Find one user with userId",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "userId",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.UserRes"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "Find one user with userId",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "userId",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "stop data",
+                        "name": "stop",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserStopDtom"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.UserIdRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/vestiges": {
+            "post": {
+                "security": [
+                    {
+                        "Authorization": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Vestige"
+                ],
+                "summary": "Save new vestige",
+                "parameters": [
+                    {
+                        "description": "vestige",
+                        "name": "vestige",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.VestigeDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.SaveTxHashRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/vestiges/ancestors": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Vestige"
+                ],
+                "summary": "Inquire vestiges of the main page",
+                "parameters": [
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "example": 0,
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "name": "take",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.ProfuseRes-res_VestigeRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/vestiges/children/{txHash}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Vestige"
+                ],
+                "summary": "Find all children with head txHash",
+                "parameters": [
+                    {
+                        "minimum": 0,
+                        "type": "integer",
+                        "example": 0,
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "name": "take",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "txHash",
+                        "name": "txHash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.ProfuseRes-res_VestigeRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/vestiges/friends/{txHash}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Vestige"
+                ],
+                "summary": "Find all friends with head txHash",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "txHash",
+                        "name": "txHash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/res.VestigeRes"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/vestiges/{txHash}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Vestige"
+                ],
+                "summary": "Find one vestige with txHash",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "txHash",
+                        "name": "txHash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/res.VestigeRes"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.AppraisalDto": {
+            "type": "object",
+            "required": [
+                "value",
+                "vestige"
+            ],
+            "properties": {
+                "value": {
+                    "type": "integer",
+                    "maximum": 50,
+                    "minimum": -50,
+                    "example": 30
+                },
+                "vestige": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UserDto": {
+            "type": "object",
+            "required": [
+                "address",
+                "id",
+                "nickname",
+                "password"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "0x1234567890abcdef1234567890abcdef12345678"
+                },
+                "id": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "example": "user123"
+                },
+                "nickname": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "example": "nick"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "123123123"
+                }
+            }
+        },
+        "dto.UserStopDtom": {
+            "type": "object",
+            "required": [
+                "date",
+                "reason"
+            ],
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "example": "2100-01-01"
+                },
+                "reason": {
+                    "type": "string",
+                    "example": "no specific reason"
+                }
+            }
+        },
+        "dto.VestigeDto": {
+            "type": "object",
+            "required": [
+                "content",
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "head": {
+                    "type": "string"
+                },
+                "parent": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "res.AppraisalRes": {
+            "type": "object",
+            "properties": {
+                "appraisal": {
+                    "type": "number"
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "res.AppraisalSpecificRes": {
+            "type": "object",
+            "properties": {
+                "confirmed": {
+                    "type": "boolean"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "next": {
+                    "$ref": "#/definitions/res.VestigeRes"
+                },
+                "txHash": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/res.UserRes"
+                },
+                "value": {
+                    "type": "integer"
+                },
+                "vestige": {
+                    "$ref": "#/definitions/res.VestigeRes"
+                }
+            }
+        },
+        "res.ProfuseRes-res_AppraisalSpecificRes": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/res.AppraisalSpecificRes"
+                    }
+                },
+                "totalCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "res.ProfuseRes-res_UserRes": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/res.UserRes"
+                    }
+                },
+                "totalCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "res.ProfuseRes-res_VestigeRes": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/res.VestigeRes"
+                    }
+                },
+                "totalCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "res.SaveTxHashRes": {
+            "type": "object",
+            "properties": {
+                "txHash": {
+                    "type": "string",
+                    "example": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+                }
+            }
+        },
+        "res.UserIdRes": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "res.UserRes": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "appraisals": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/res.AppraisalSpecificRes"
+                    }
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "nickname": {
+                    "type": "string"
+                },
+                "stopUntil": {
+                    "type": "string"
+                },
+                "vestiges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/res.VestigeRes"
+                    }
+                }
+            }
+        },
+        "res.VestigeRes": {
+            "type": "object",
+            "properties": {
+                "appraisal": {
+                    "$ref": "#/definitions/res.AppraisalRes"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/res.VestigeRes"
+                    }
+                },
+                "confirmed": {
+                    "type": "boolean"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "friends": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "head": {
+                    "type": "string"
+                },
+                "hit": {
+                    "type": "integer"
+                },
+                "parent": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "txHash": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/res.UserRes"
+                }
             }
         }
     },

@@ -40,11 +40,6 @@ func (r *UserRes) FromEntity(e *entity.User) *UserRes {
 	return r
 }
 
-type UsersRes struct {
-	TotalCount int64     `json:"totalCount"`
-	Data       []UserRes `json:"data"`
-}
-
-type UserStopRes struct {
+type UserIdRes struct {
 	Id string `json:"id"`
 }

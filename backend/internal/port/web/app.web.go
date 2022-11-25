@@ -26,45 +26,12 @@ type Web struct {
 
 func NewWeb(app *fiber.App, address string, privateKey *rsa.PrivateKey) *Web {
 	w := &Web{app, address, privateKey}
+	p := &processor{}
 
 	w.App.Use(cors.New())
 	w.App.Use(limiter.New(limiter.Config{
 		Expiration: 60 * time.Second,
 		Max:        1000,
-	}))
-	w.App.Use(func(c *fiber.Ctx) error {
-		c.Locals("authorized", true)
-		return c.Next()
-	})
-
-	app.Get("/swagger/*", swagger.HandlerDefault)
-
-	return w
-}
-
-func (w *Web) Attach(controllers []hook.Controller) {
-	p := &processor{}
-
-	for _, c := range controllers {
-		c.Accessible()
-	}
-
-	w.App.Use(jwtware.New(jwtware.Config{
-		SigningMethod: "RS256",
-		SigningKey:    w.privateKey,
-		SuccessHandler: func(c *fiber.Ctx) error {
-			user := c.Locals("user").(*jwt.Token)
-			claims := user.Claims.(jwt.MapClaims)
-			id := claims["id"].(string)
-			authority := claims["authority"].(uint8)
-			c.Locals("id", id)
-			c.Locals("authority", authority)
-			return c.Next()
-		},
-		ErrorHandler: func(c *fiber.Ctx, err error) error {
-			c.Locals("authorized", false)
-			return c.Next()
-		},
 	}))
 	w.App.Use(func(c *fiber.Ctx) error {
 		return fiberlog.New(fiberlog.Config{
@@ -83,16 +50,62 @@ func (w *Web) Attach(controllers []hook.Controller) {
 					"status_code":    p.statusCode,
 					"request_uri":    p.requestUri,
 				},
-				id: c.Locals("id"),
+				id: func() string {
+					token, ok := c.Locals("user").(*jwt.Token)
+					if !ok {
+						return ""
+					}
+					claim, ok := token.Claims.(jwt.MapClaims)
+					if !ok {
+						return ""
+					}
+					id, ok := claim["id"]
+					if !ok {
+						return ""
+					}
+					if s, ok := id.(string); !ok {
+						return ""
+					} else {
+						return s
+					}
+				}(),
 			},
 		})(c)
 	})
+
+	w.App.Get("/swagger/*", swagger.HandlerDefault)
+
+	return w
+}
+
+func (w *Web) Attach(controllers []hook.Controller) {
 	w.App.Use(func(c *fiber.Ctx) error {
-		if !c.Locals("authorized").(bool) {
-			return c.Status(fiber.StatusUnauthorized).JSON(res.NewErrorClientRes(c, "unauthorized"))
-		}
 		return c.Next()
 	})
+
+	for _, c := range controllers {
+		c.Accessible()
+	}
+
+	w.App.Use(jwtware.New(jwtware.Config{
+		SigningMethod: "RS256",
+		SigningKey:    w.privateKey,
+		SuccessHandler: func(c *fiber.Ctx) error {
+			claims := c.Locals("user").(*jwt.Token).Claims.(jwt.MapClaims)
+			for _, field := range []string{
+				"id",
+				"authority",
+				"confirmed",
+				"availableAt",
+			} {
+				c.Locals(field, claims[field])
+			}
+			return c.Next()
+		},
+		ErrorHandler: func(c *fiber.Ctx, err error) error {
+			return c.Status(fiber.StatusUnauthorized).JSON(res.NewErrorClientRes(c, "unauthorized"))
+		},
+	}))
 
 	for _, c := range controllers {
 		c.Restricted()

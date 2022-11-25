@@ -6,7 +6,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// type NormalCaseFunc func(int) error
 type ErrorCaseFunc func(int, error) error
 
 type Response struct {

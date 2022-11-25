@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var skipLogging = map[string]bool{
+var pageLogging = map[string]bool{
 	"/api/health":                     true,
 	"/favicon.ico":                    true,
 	"/swagger":                        true,
@@ -60,7 +60,7 @@ func (*processor) statusCode(b []byte) any {
 
 func (*processor) requestUri(b []byte) any {
 	s := strings.TrimRight(string(b), "/")
-	if skipLogging[s] {
+	if pageLogging[s] {
 		panic(0)
 	} else {
 		return s
