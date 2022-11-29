@@ -20,8 +20,8 @@ contract ClinkerERC721 is ERC721URIStorage, Ownable {
         Status status;
     }
 
-    mapping(address => User) users;
-    mapping(address => address) linker;
+    mapping(address => User) public users;
+    mapping(address => address) public linker;
 
     event AddressAvailable(address indexed available);
 

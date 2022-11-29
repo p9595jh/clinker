@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package clink;
+
+option go_package = "layer/internal/port/proto/clink";
+
+service Clink {
+    // backend -> layer
+    rpc VestigeCreate(VestigeCreateRequest) returns (TxHashResponse);
+    rpc AppraisalCreate(AppraisalCreateRequest) returns (TxHashResponse);
+
+    // layer -> backend
+    rpc Confirm(ConfirmRequest) returns (ConfirmResponse);
+}
+
+enum Kind {
+    VESTIGE = 0;
+    APPRAISAL = 1;
+    USER = 2;
+}
+
+message VestigeCreateRequest {
+    string parent = 1;
+    string head = 2;
+    string title = 3;
+    string content = 4;
+    int64 hit = 5;
+    string user_id = 6;
+    string address = 7;
+    string error = 8;
+}
+
+message AppraisalCreateRequest {
+    int64 value = 1;
+    string vestige_id = 2;
+    string next_id = 3;
+    string user_id = 4;
+    string address = 5;
+    string error = 6;
+}
+
+message TxHashResponse {
+    Kind kind = 1;
+    string tx_hash = 2;
+    string error = 3;
+}
+
+message ConfirmRequest {
+    Kind kind = 1;
+    string id = 2;  // txHash or userId or else
+    string error = 3;
+}
+
+message ConfirmResponse {
+    Kind kind = 1;
+    string id = 2;  // txHash or userId or else
+    bool confirmed = 3;
+    string error = 4;
+}
