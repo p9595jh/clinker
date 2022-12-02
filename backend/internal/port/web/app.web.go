@@ -112,6 +112,8 @@ func (w *Web) Attach(controllers []hook.Controller) {
 	}
 }
 
-func (w *Web) Listen() error {
-	return w.App.Listen(w.Address)
+func (w *Web) Listen() <-chan error {
+	ch := make(chan error)
+	go func() { ch <- w.App.Listen(w.Address) }()
+	return ch
 }

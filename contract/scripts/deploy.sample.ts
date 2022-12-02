@@ -6,17 +6,14 @@ async function main() {
   console.log("signer addresse:", await signer.getAddress());
   console.log("before signer balance:", await signer.getBalance());
 
-  const ClickerERC721 = await ethers.getContractFactory(
-    "ClinkerERC721",
-    signer
-  );
-  const clinker = await ClickerERC721.deploy();
+  const sample = await ethers.getContractFactory("Sample", signer);
+  const s = await sample.deploy();
 
-  const contract = await clinker.deployed();
+  const contract = await s.deployed();
 
   console.log("after signer balance:", await signer.getBalance());
 
-  console.log(`ClinkerERC721 deployed to: ${clinker.address}`);
+  console.log(`Sample deployed to: ${s.address}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

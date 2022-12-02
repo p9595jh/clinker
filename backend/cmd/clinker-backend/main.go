@@ -9,6 +9,7 @@ import (
 	"clinker-backend/internal/domain/service"
 	"clinker-backend/internal/infrastructure/database/dbconn"
 	"clinker-backend/internal/infrastructure/database/repository"
+	rpcserver "clinker-backend/internal/infrastructure/rpc/server"
 	"clinker-backend/internal/port/controller"
 	"clinker-backend/internal/port/web"
 	"fmt"
@@ -95,7 +96,7 @@ func main() {
 			ErrorHandler: func(c *fiber.Ctx, err error) error {
 				return c.Status(fiber.StatusNotFound).JSON(res.NewErrorClientRes(c, "Page Not Found"))
 			},
-		}), fmt.Sprintf(":%s", config.V.GetString("port")), authService.PK())
+		}), fmt.Sprintf(":%s", config.V.GetString("port.http")), authService.PK())
 		api = w.App.Group("/api")
 	)
 
@@ -119,8 +120,22 @@ func main() {
 
 	logger.Info(ctx).W("Controllers loaded")
 
-	logger.Info(ctx).Wf("Server is listening %s", w.Address)
-	if err := w.Listen(); err != nil {
+	// rpc server
+	var (
+		clinkRpcServer = rpcserver.NewClinkRpcServer(config.V.GetInt("port.rpc"), userRepository, vestigeRepository, appraisalRepository)
+	)
+	logger.Info(ctx).W("RPC Servers loaded")
+
+	logger.Info(ctx).Wf("HTTP Server is listening %s", w.Address)
+	go func() {
+		if err := <-w.Listen(); err != nil {
+			logger.Error(ctx).E(err).W()
+		}
+	}()
+
+	rpc := config.V.GetString("port.rpc")
+	logger.Info(ctx).Wf("RPC Server is listening %s", rpc)
+	if err := <-clinkRpcServer.Listen(); err != nil {
 		logger.Error(ctx).E(err).W()
 	}
 }

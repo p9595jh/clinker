@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  ganache:
+    image: trufflesuite/ganache:latest
+    restart: always
+    container_name: ganache
+    ports:
+      - "9545:9545"
+    env_file:
+      - .env
+    command:
+      - -p=9545
+      - -b=5
+      - --server.ws=true
+      - --chain.chainId=1207
+      - --wallet.accounts="$PK1,9000000000000000000000000"
+      - --wallet.accounts="$PK2,9000000000000000000000000"
