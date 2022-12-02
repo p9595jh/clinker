@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.21.8
-// source: internal/port/proto/clink/clink.proto
+// source: internal/infrastructure/rpc/proto/clink/clink.proto
 
 package clink
 
@@ -177,5 +177,5 @@ var Clink_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/port/proto/clink/clink.proto",
+	Metadata: "internal/infrastructure/rpc/proto/clink/clink.proto",
 }

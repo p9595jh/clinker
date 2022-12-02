@@ -13,7 +13,8 @@ var (
 func init() {
 	viper.SetConfigFile("./.env")
 	if err := viper.ReadInConfig(); err != nil {
-		panic(err)
+		// panic(err)
+		return
 	}
 
 	// "THIS_IS_SAMPLE" -> "this.is.sample"

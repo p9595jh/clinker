@@ -3,6 +3,7 @@ module layer
 go 1.19
 
 require (
+	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/rs/zerolog v1.28.0
 	google.golang.org/grpc v1.51.0
 	google.golang.org/protobuf v1.28.1
@@ -45,6 +46,7 @@ require (
 
 require (
 	github.com/ethereum/go-ethereum v1.10.26
+	github.com/jasonlvhit/gocron v0.0.1
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/spf13/viper v1.14.0
