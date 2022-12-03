@@ -20,7 +20,7 @@ elif [ $mode = "start" ]; then
 
 elif [ $mode = "stop" ]; then
 
-    ps=($(ps | grep 'ganache-cli'))
+    ps=($(ps | grep 'ganache'))
     kill -9 ${ps[0]}
 
 else
