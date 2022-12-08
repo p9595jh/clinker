@@ -1,7 +1,11 @@
 package config
 
 import (
+	"errors"
+	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -13,8 +17,12 @@ var (
 func init() {
 	viper.SetConfigFile("./.env")
 	if err := viper.ReadInConfig(); err != nil {
-		// panic(err)
-		return
+		if errors.Is(err, os.ErrNotExist) {
+			fmt.Println("\033[33mno .env file - guess it's a test mode (will be closed after 31s)\033[0m")
+			go func() { time.Sleep(time.Second * 31); panic(err) }()
+		} else {
+			panic(err)
+		}
 	}
 
 	// "THIS_IS_SAMPLE" -> "this.is.sample"

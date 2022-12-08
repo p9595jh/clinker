@@ -10,9 +10,8 @@ import (
 )
 
 var (
-	consoleLogger zerolog.Logger
-	fileLogger    zerolog.Logger
-	format        = "./log/2006-01-02.log"
+	consoleLogger, fileLogger zerolog.Logger
+	format                    = "./log/2006-01-02.log"
 )
 
 type logItem struct {
@@ -20,6 +19,10 @@ type logItem struct {
 }
 
 func init() {
+	consoleLogger = zerolog.New(zerolog.NewConsoleWriter()).With().Timestamp().Logger()
+}
+
+func FileLoggerInit() {
 	if _, err := os.Stat("./log"); err != nil {
 		if os.IsNotExist(err) {
 			if err := os.Mkdir("./log", 0755); err != nil {
@@ -36,7 +39,6 @@ func init() {
 		writer *os.File = nil
 	)
 
-	consoleLogger = zerolog.New(zerolog.NewConsoleWriter()).With().Timestamp().Logger()
 	fileLoggerInit := func(date string) {
 		file, err := os.OpenFile(date, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0755)
 		if err != nil {

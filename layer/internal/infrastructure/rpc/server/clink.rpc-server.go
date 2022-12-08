@@ -80,7 +80,6 @@ func (s *ClinkRpcServer) Listen() <-chan error {
 	clink.RegisterClinkServer(grpcServer, s)
 
 	ch := make(chan error)
-	logger.Info(s.name()).Wf("Listeneing at %d", s.port)
 	go func() { ch <- grpcServer.Serve(lis) }()
 	return ch
 }
