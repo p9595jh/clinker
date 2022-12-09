@@ -10,11 +10,11 @@ The community system is provided as a web application.
 
 ## Flow
 
-### vestige, appraisal
+### user
 
 ![user-registration](./images/user-flow.drawio.png)
 
-### user
+### vestige, appraisal
 
 ![vestige-appraisal-flow](./images/vestige-appraisal-flow.png)
 
