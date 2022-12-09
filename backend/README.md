@@ -4,7 +4,7 @@
 
 ## Composition
 
-![../images/backend.png](composition)
+![composition](../images/backend.png)
 
 - Go 1.19
 - Fiber web framework
@@ -16,7 +16,7 @@
 
 ## Database
 
-![../images/backend-db.png](db)
+![db](../images/backend-db.png)
 
 ## Requirements
 

@@ -8,7 +8,7 @@ When after sending a transaction, `Layer` saves its gas information.
 
 ## Composition
 
-![../images/layer.png](composition)
+![composition](../images/layer.png)
 
 - Go 1.19
 - gRPC
@@ -18,7 +18,7 @@ When after sending a transaction, `Layer` saves its gas information.
 
 ## Database
 
-![../images/layer-db.png](db)
+![db](../images/layer-db.png)
 
 ## Requirements
 

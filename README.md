@@ -6,12 +6,16 @@ The community system is provided as a web application.
 
 ## Composition
 
-![./images/clinker.png](clinker)
+![clinker](./images/clinker.png)
 
 ## Flow
 
-![./images/user-flow.drawio.png](user-registration)
+### vestige, appraisal
 
-![./images/vestige-appraisal-flow.png](vestige-appraisal-flow)
+![user-registration](./images/user-flow.drawio.png)
+
+### user
+
+![vestige-appraisal-flow](./images/vestige-appraisal-flow.png)
 
 More information can be checked in each component's folder.
